@@ -1,7 +1,7 @@
 import sys, requests, argparse, json
 
 checkName = "check-cadvisor.py"
-checkVersion = "0.2.0"
+checkVersion = "0.2.1"
 
 #CHANGE SUMMARY
 #USES AGNOSTC EXIT WITH NAGIOS STATES AND ASSOCIATED STATE CODES
@@ -374,17 +374,14 @@ if hasContainer[0] == 1:
     else:
         #OUTPUT MSG
         checkStateCode = 2
-        msg = "FOUND ("+str(pscnt)+") TOTAL PROCESS/S FOR ("+args.container+")."   
-    #DEBUG OUT
+        msg = "FOUND ("+str(pscnt)+") TOTAL PROCESS/S FOR ("+args.container+")."
 
     #EXIT CHECK
     checkExit(checkStateCode, msg)
 else:
-    #NO CONTAINER SO EXIT WITH UNKNOWN
+    #NO CONTAINER SO EXIT WITH CRITICAL
     checkStateCode = 2
     msg = "NO RUNNING CONTAINER FOUND MATCHING ("+args.container+")."
-    
-    #DEUG OUT
     
     #EXIT CHECK
     checkExit(checkStateCode,msg)
