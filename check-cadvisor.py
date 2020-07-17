@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import sys, requests, argparse, json
 
 checkName = "check-cadvisor.py"
