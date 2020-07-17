@@ -1,10 +1,13 @@
 import sys, requests, argparse, json
 
 checkName = "check-cadvisor.py"
-checkVersion = "0.2.1"
+checkVersion = "0.3.0"
 
 #CHANGE SUMMARY
-#USES AGNOSTC EXIT WITH NAGIOS STATES AND ASSOCIATED STATE CODES
+#PERFORMANCE DATA REFCATOR
+#REMOVED STARTTIME, CMD, STATUS AS THESE VALUES ARE STRINGS 
+#CHANGE TO UNKNOWN MESSAGES FORMAT
+#TYPO CORRECTIONS
 
 #GET LIST OF ALL CONTAINERS SND CGROUP_PATHS
 def getContainerList(args):
@@ -23,7 +26,7 @@ def getContainerList(args):
     if r.status_code != 200:
         #EXIT WITH UNKNOWN
         checkStateCode = 3
-        msg = "Unable to get a list of containers from cadvisor."
+        msg = "UNABLE TO RETRIEVE CONTAINER LIST FROM CADVISOR"
         checkExit(checkStateCode, msg)
     else:
         #RETURN LIST OF PROCESSES
@@ -89,7 +92,7 @@ def getDockerPs(args, cgp):
     if r.status_code != 200:
         #STATE UNKNOWN
         checkStateCode = 3
-        msg = "Unable to get a list of processes from cadvisor."
+        msg = "UNABLE TO RETRIEVE PROCESS LIST FROM CADVISOR"
         
         #EXIT CHECK
         checkExit(checkStateCode, msg)
@@ -113,11 +116,11 @@ def getContainerStats(args,cgp):
         #print("REQUEST JSON")
         #print(r.json())
     
-    #REQUEST OTHER THAN 200 INDICATE PROBLEMS WIT CONNECTIVITY
+    #REQUEST OTHER THAN 200 INDICATE PROBLEMS WITH CONNECTIVITY
     if r.status_code != 200:
         #STATE UNKNOWN
         checkStateCode = 3
-        msg = " UNABLE TO RETRIEVE STATS FOR CONTAINER ("+args.container+")."
+        msg = "UNABLE TO RETRIEVE STATS FOR CONTAINER ("+args.container+") FROM CADVISOR"
         
         #EXIT CHECK
         checkExit(checkStateCode,msg)
@@ -151,7 +154,6 @@ def getDockerSats(docker_ps_out,cgp):
         running_time = k['running_time']
         percent_cpu = k['percent_cpu']
         percent_mem = k['percent_mem']
-        start_time = k['start_time']
         running_time = k['running_time']
             
         #RESULTS FOR SINGLE PROCESS
@@ -218,12 +220,6 @@ def getCheckPerfdata(docker_ps_data):
 
             #PER PROCESS PARENT PID
             perfdata += prefix+"parent-pid="+str( docker_ps_data[pk]['stats']['parent_pid'])+"; "
-
-            #PROCESS COMMAND
-            perfdata += prefix+"cmd="+str( docker_ps_data[pk]['stats']['command'])+"; "
-
-            #PER PROCESS START TIME
-            perfdata += prefix+"start-time="+str( docker_ps_data[pk]['stats']['start_time'])+"; "
             
             #PER PROCESS RUNNING TIME
             perfdata += prefix+"running-time="+str( docker_ps_data[pk]['stats']['running_time'])+"; "
@@ -234,13 +230,10 @@ def getCheckPerfdata(docker_ps_data):
             #PER PROCESS MEM
             perfdata += prefix+"mem="+str( docker_ps_data[pk]['stats']['percent_mem'])+"; "
 
-            #PER PROCESS STATUS
-            perfdata += prefix+"status="+str( docker_ps_data[pk]['stats']['status'])+"; "
-
         #ADD THE SUM TOTALS TO THE PERFDATA
-        perfdata += "process_count="+str(psct)+"; "
+        perfdata += "total-process-count="+str(psct)+"; "
         perfdata += "total-cpu="+str(p_cpu_total)+"; "
-        perfdata += "total_mem="+str(p_mem_total)+"; "
+        perfdata += "total-mem="+str(p_mem_total)+"; "
 
     if args.debug:
         #PERFDATA
@@ -365,7 +358,7 @@ if hasContainer[0] == 1:
     if pscnt > 0:
         #OUTPUT MSG
         checkStateCode = 0
-        msg = "CAONTAINER UP, FOUND ("+str(pscnt)+") TOTAL PROCESS/S FOR ("+args.container+")."    
+        msg = "CONTAINER UP, FOUND ("+str(pscnt)+") TOTAL PROCESS/S FOR ("+args.container+") "    
 
         #GET PERFDATA
         if args.perfdata:
@@ -374,7 +367,7 @@ if hasContainer[0] == 1:
     else:
         #OUTPUT MSG
         checkStateCode = 2
-        msg = "FOUND ("+str(pscnt)+") TOTAL PROCESS/S FOR ("+args.container+")."
+        msg = "FOUND ("+str(pscnt)+") TOTAL PROCESS/S FOR ("+args.container+") "
 
     #EXIT CHECK
     checkExit(checkStateCode, msg)
