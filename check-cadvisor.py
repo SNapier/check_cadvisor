@@ -368,7 +368,7 @@ if hasContainer[0] == 1:
             msg += perfdata
     else:
         #OUTPUT MSG
-        checkStateCode = 2
+        checkStateCode = 0
         msg = "FOUND ("+str(pscnt)+") TOTAL PROCESS/S FOR ("+args.container+") "
 
     #EXIT CHECK
